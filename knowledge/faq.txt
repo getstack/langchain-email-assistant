@@ -1,0 +1,10 @@
+# Support FAQ
+
+Q: What is REST API?
+A: REST is an architectural style for web APIs that uses HTTP methods (GET, POST, PUT, DELETE) and resource URLs.
+
+Q: What should I do if customer sync is completed?
+A: Notify the client with a short professional update and mention any remaining open items such as Sales Order sync.
+
+Q: How long should emails be?
+A: Short for quick updates, Medium for standard business notes, Long when detail and context are required.

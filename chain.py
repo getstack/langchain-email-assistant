@@ -1,25 +1,10 @@
-from dotenv import load_dotenv
+"""Backward-compatible LangChain exports used by older imports. """
 
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import StrOutputParser
 
-from prompt import email_prompt
+from llm import get_model
+from prompts import email_prompt
 
-
-# Load environment variables
-load_dotenv()
-
-
-# Initialize Gemini model
-model = ChatGoogleGenerativeAI(
-    model="gemini-3.6-flash",
-    temperature=0.7,
-)
-
-
-# Convert AI response to plain text
+model = get_model()
 parser = StrOutputParser()
-
-
-# Build the LangChain pipeline
 email_chain = email_prompt | model | parser

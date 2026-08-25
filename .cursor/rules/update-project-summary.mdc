@@ -1,0 +1,49 @@
+---
+description: Keep PROJECT_SUMMARY.md in sync when project behavior or structure changes
+alwaysApply: true
+---
+
+# Keep PROJECT_SUMMARY.md Updated
+
+When you change anything that affects how this project works, its structure, stack, or roadmap, also update `PROJECT_SUMMARY.md` in the same task.
+
+## Update PROJECT_SUMMARY.md when you change
+
+- User-facing behavior (new inputs, outputs, features, UI flow)
+- Architecture or data flow (new files, modules, chains, models, parsers)
+- Project structure (new/renamed/removed files or responsibilities)
+- Tech stack or dependencies (`requirements.txt`, new integrations)
+- Setup or run instructions
+- Completed vs planned roadmap items
+
+## Do not update for
+
+- Formatting-only edits with no behavior change
+- Comments or minor refactors that do not change scope
+- `.env` or local-only config values (never commit secrets)
+
+## What to keep in sync
+
+Ensure `PROJECT_SUMMARY.md` reflects:
+
+1. **What It Does** — current user workflow
+2. **Project Structure** — file roles
+3. **Architecture** — pipeline and key code path
+4. **Tech Stack** — libraries and services in use
+5. **Current Scope and Roadmap** — completed vs planned items
+6. **Run Locally** — setup and run steps
+
+## Workflow
+
+1. Make the code or config change.
+2. Review `PROJECT_SUMMARY.md` for outdated sections.
+3. Update only the sections affected by the change.
+4. Keep the summary concise; do not duplicate full README content.
+
+## Example
+
+If you add subject line generation in `app.py` and `prompt.py`:
+
+- Add it under **What It Does**
+- Move "Subject line generation" from **Planned** to **Completed**
+- Update **Architecture** if the chain or flow changed
