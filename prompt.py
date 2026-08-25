@@ -1,12 +1,5 @@
-from langchain_core.prompts import ChatPromptTemplate
+"""Backward-compatible prompt export. Prefer prompts.py for new code. """
 
-email_prompt = ChatPromptTemplate.from_template("""
-You are an expert email writing assistant.
+from prompts import email_prompt, TONES, LENGTHS
 
-Write a {tone} email based on the following notes.
-
-Notes:
-{notes}
-
-Only return the email.
-""")
+__all__ = ["email_prompt", "TONES", "LENGTHS"]

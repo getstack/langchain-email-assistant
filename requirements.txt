@@ -1,5 +1,9 @@
-streamlit
+streamlit>=1.60.0
 langchain
 langchain-core
 langchain-google-genai
+langchain-community
+langchain-text-splitters
+langgraph
+numpy
 python-dotenv
