@@ -133,48 +133,23 @@ def render_profile() -> None:
     user = current_user()
     if not user:
         return
+    tones = [
+        "Professional",
+        "Friendly",
+        "Formal",
+        "Casual",
+        "Confident",
+        "Polite",
+        "Persuasive",
+        "Apologetic",
+    ]
     st.subheader("Profile")
     with st.form("profile_form"):
         display_name = st.text_input("Display name", value=user["display_name"])
         email = st.text_input("Email", value=user.get("email") or "")
-        default_tone = st.selectbox(
-            "Default tone",
-            [
-                "Professional",
-                "Friendly",
-                "Formal",
-                "Casual",
-                "Confident",
-                "Polite",
-                "Persuasive",
-                "Apologetic",
-            ],
-            index=max(
-                0,
-                [
-                    "Professional",
-                    "Friendly",
-                    "Formal",
-                    "Casual",
-                    "Confident",
-                    "Polite",
-                    "Persuasive",
-                    "Apologetic",
-                ].index(user.get("default_tone") or "Professional")
-                if (user.get("default_tone") or "Professional")
-                in {
-                    "Professional",
-                    "Friendly",
-                    "Formal",
-                    "Casual",
-                    "Confident",
-                    "Polite",
-                    "Persuasive",
-                    "Apologetic",
-                }
-                else 0,
-            ),
-        )
+        current_tone = user.get("default_tone") or "Professional"
+        tone_index = tones.index(current_tone) if current_tone in tones else 0
+        default_tone = st.selectbox("Default tone", tones, index=tone_index)
         saved = st.form_submit_button("Save profile", type="primary")
         if saved:
             save_profile(display_name, email, default_tone)
