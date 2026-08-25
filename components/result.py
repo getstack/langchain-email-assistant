@@ -33,10 +33,10 @@ def render_result(*, on_regenerate, on_edit) -> None:
         st.download_button(
             "Copy",
             data=result["text"],
-            file_name="result.txt",
+            file_name="generated.txt",
             mime="text/plain",
             width="stretch",
-            help="Download/copy the generated text",
+            help="Download the generated text so you can copy it",
         )
     with b2:
         if st.button("Regenerate", width="stretch"):

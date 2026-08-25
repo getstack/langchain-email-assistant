@@ -21,7 +21,7 @@ Learning and portfolio AI SaaS for writing emails, replying to emails, and askin
 - `chain.py` / `llm.py` — model factory and legacy LCEL export
 - `auth/` — session login + profile helpers
 - `database/` — SQLite users, history, usage
-- `rag/` — document load → split → embed → FAISS retrieve
+- `rag/` — document load → split → embed → in-memory cosine retrieve
 - `graph/` — LangGraph understand → retrieve? → generate → review
 - `knowledge/` — sample docs for RAG
 - `utils/` — validation, rate limit, logging
@@ -63,6 +63,7 @@ UI (Streamlit)
 - Phase 8: RAG knowledge base
 - Phase 9: LangGraph workflow
 - Phase 10: Validation, rate limiting, logging, CI
+- UI polish pass (login card, mode cards, sidebar icons, Generate CTA)
 
 ### Planned / next hardening
 
@@ -70,6 +71,7 @@ UI (Streamlit)
 - Managed DB for multi-instance Cloud
 - LangSmith tracing
 - Docker / full API split
+- Native clipboard copy (beyond download button)
 
 ## Run Locally
 

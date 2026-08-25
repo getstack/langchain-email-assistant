@@ -6,24 +6,24 @@ APP_CSS = """
         --aca-purple: #6d28d9;
         --aca-purple-soft: #ede9fe;
         --aca-lavender: #a78bfa;
-        --aca-bg: #f8f7fc;
+        --aca-bg: #f7f5ff;
         --aca-card: #ffffff;
         --aca-text: #1e1b4b;
         --aca-muted: #6b7280;
-        --aca-radius: 12px;
-        --aca-shadow: 0 4px 16px rgba(109, 40, 217, 0.08);
-        --aca-border: #e5e7eb;
+        --aca-radius: 14px;
+        --aca-shadow: 0 8px 24px rgba(109, 40, 217, 0.08);
+        --aca-border: #e8e4f5;
     }
 
     .stApp, [data-testid="stAppViewContainer"] {
-        background: var(--aca-bg);
+        background: radial-gradient(circle at top right, #efe9ff 0%, var(--aca-bg) 42%, #f8fafc 100%);
         color: var(--aca-text);
     }
 
     .block-container {
-        padding-top: 1.25rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 1100px;
+        padding-top: 1.1rem !important;
+        padding-bottom: 2.5rem !important;
+        max-width: 1080px;
     }
 
     h1, h2, h3 {
@@ -37,9 +37,10 @@ APP_CSS = """
     }
 
     section[data-testid="stSidebar"] .stButton > button {
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         width: 100%;
         justify-content: flex-start;
+        font-weight: 500 !important;
     }
 
     div[data-testid="stTextArea"] textarea {
@@ -47,7 +48,7 @@ APP_CSS = """
         border: 1px solid var(--aca-border) !important;
         background: var(--aca-card) !important;
         box-shadow: var(--aca-shadow);
-        min-height: 140px;
+        min-height: 150px;
     }
 
     div[data-testid="stSelectbox"] > div {
@@ -56,11 +57,11 @@ APP_CSS = """
 
     div[data-testid="stButton"] > button[kind="primary"] {
         border-radius: var(--aca-radius) !important;
-        background: var(--aca-purple) !important;
+        background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
         color: #ffffff !important;
         border: none !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+        box-shadow: 0 8px 18px rgba(109, 40, 217, 0.28);
     }
 
     div[data-testid="stButton"] > button[kind="primary"]:hover {
@@ -69,7 +70,7 @@ APP_CSS = """
     }
 
     div[data-testid="stButton"] > button[kind="secondary"] {
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         border: 1px solid var(--aca-border) !important;
         background: #fff !important;
         color: var(--aca-text) !important;
@@ -79,14 +80,21 @@ APP_CSS = """
         background: var(--aca-card);
         border: 1px solid var(--aca-border);
         border-radius: var(--aca-radius);
-        padding: 1rem 1.1rem;
+        padding: 1.1rem 1.15rem;
         box-shadow: var(--aca-shadow);
-        min-height: 96px;
+        min-height: 104px;
+        transition: border-color 0.15s ease, transform 0.15s ease;
     }
 
     .aca-mode-card.active {
         border: 2px solid var(--aca-purple);
-        background: #f5f3ff;
+        background: linear-gradient(180deg, #faf8ff, #f3efff);
+        transform: translateY(-1px);
+    }
+
+    .aca-mode-card .aca-icon {
+        font-size: 1.15rem;
+        margin-bottom: 0.35rem;
     }
 
     .aca-mode-card h4 {
@@ -99,6 +107,7 @@ APP_CSS = """
         margin: 0;
         color: var(--aca-muted);
         font-size: 0.85rem;
+        line-height: 1.35;
     }
 
     .aca-result-card {
@@ -107,19 +116,33 @@ APP_CSS = """
         border-radius: var(--aca-radius);
         padding: 1.25rem;
         box-shadow: var(--aca-shadow);
-        white-space: pre-wrap;
-        line-height: 1.55;
+        line-height: 1.6;
     }
 
     .aca-pro-card {
         background: linear-gradient(145deg, #f5f3ff, #ede9fe);
         border: 1px solid #ddd6fe;
         border-radius: var(--aca-radius);
-        padding: 0.9rem;
+        padding: 0.95rem;
         margin: 0.75rem 0;
+    }
+
+    .aca-login-wrap {
+        max-width: 420px;
+        margin: 4rem auto 0 auto;
+        background: #fff;
+        border: 1px solid var(--aca-border);
+        border-radius: 18px;
+        padding: 1.75rem 1.5rem 1.25rem 1.5rem;
+        box-shadow: var(--aca-shadow);
+    }
+
+    .aca-login-wrap h2 {
+        margin: 0.35rem 0 0.25rem 0;
     }
 
     .aca-muted { color: var(--aca-muted); font-size: 0.85rem; }
     .aca-brand { font-weight: 700; color: var(--aca-text); }
+    .aca-greeting { margin-bottom: 0.15rem; }
 </style>
 """

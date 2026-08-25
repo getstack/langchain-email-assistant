@@ -23,8 +23,14 @@ def render_header() -> None:
     left, right = st.columns([3, 1])
     with left:
         name = user["display_name"].split()[0] if user else "there"
-        st.markdown(f"## {_greeting()}, {name}")
+        st.markdown(
+            f"<h2 class='aca-greeting'>{_greeting()}, {name} 👋</h2>",
+            unsafe_allow_html=True,
+        )
         st.caption("What would you like to work on today?")
     with right:
         label = user["display_name"] if user else "Guest"
-        st.markdown(f"<div style='text-align:right;padding-top:0.6rem;'>🔔 &nbsp; <strong>{label}</strong></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div style='text-align:right;padding-top:0.85rem;color:#4b5563;'>🔔 &nbsp; <strong>{label}</strong> ▾</div>",
+            unsafe_allow_html=True,
+        )

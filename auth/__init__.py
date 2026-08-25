@@ -20,18 +20,29 @@ def require_login() -> bool:
     if st.session_state.user:
         return True
 
-    st.markdown("### Sign in")
-    st.caption("Demo account: username `demo` / password `demo123`")
-    with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Sign in", type="primary")
-        if submitted:
-            user = authenticate(username, password)
-            if user:
-                st.session_state.user = user
-                st.rerun()
-            st.error("Invalid username or password.")
+    left, center, right = st.columns([1, 1.2, 1])
+    with center:
+        st.markdown(
+            """
+            <div class="aca-login-wrap">
+                <div class="aca-brand">✦ AI Communication Assistant</div>
+                <h2>Welcome back</h2>
+                <p class="aca-muted">Sign in to write emails, reply, and ask AI.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.caption("Demo account: username `demo` / password `demo123`")
+        with st.form("login_form"):
+            username = st.text_input("Username", placeholder="demo")
+            password = st.text_input("Password", type="password", placeholder="••••••••")
+            submitted = st.form_submit_button("Sign in", type="primary", width="stretch")
+            if submitted:
+                user = authenticate(username, password)
+                if user:
+                    st.session_state.user = user
+                    st.rerun()
+                st.error("Invalid username or password.")
     return False
 
 

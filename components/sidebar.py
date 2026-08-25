@@ -11,9 +11,9 @@ from database import list_history, usage_summary
 
 
 MODE_LABELS = {
-    "write": "Write Email",
-    "reply": "Reply to Email",
-    "ask": "Ask AI",
+    "write": "✉  Write Email",
+    "reply": "↩  Reply to Email",
+    "ask": "💬  Ask AI",
 }
 
 
@@ -77,7 +77,7 @@ def render_sidebar() -> None:
         st.markdown(
             """
             <div class="aca-pro-card">
-                <strong>Upgrade to Pro</strong>
+                <strong>✦ Upgrade to Pro</strong>
                 <p class="aca-muted">Unlock higher limits and team features (placeholder).</p>
             </div>
             """,
