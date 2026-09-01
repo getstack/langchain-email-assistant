@@ -129,7 +129,7 @@ def sign_in(email: str, password: str) -> tuple[dict[str, Any] | None, str]:
 
 def sign_out() -> None:
     try:
-        if supabase_enabled() and st.session_state.get("sb_access_token"):
+        if st.session_state.get("sb_access_token"):
             get_supabase_client().auth.sign_out()
     except Exception:
         pass
@@ -140,7 +140,7 @@ def sign_out() -> None:
 
 def save_profile(display_name: str, email: str, default_tone: str) -> None:
     user = st.session_state.get("user")
-    if not user or user.get("auth_provider") != "supabase":
+    if not user:
         return
     upsert_profile(user["id"], display_name.strip(), default_tone)
     user["display_name"] = display_name.strip()

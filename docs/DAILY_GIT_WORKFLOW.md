@@ -57,5 +57,4 @@ git pull origin main
 GOOGLE_API_KEY = "..."
 SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co"
 SUPABASE_ANON_KEY = "..."
-ACA_DB_PATH = "/tmp/aca.db"
 ```
