@@ -12,8 +12,8 @@ This repository evolved from a simple email generator (`v0.1.0`) into a multi-mo
 - **Write Email** with tone + length and structured subject/body
 - **Reply to Email**
 - **Ask AI** (general Q&A)
-- Demo authentication + user profile
-- SQLite history and usage/token estimates
+- Demo authentication + user profile (Supabase email/password)
+- Supabase Postgres history and usage/token estimates
 - RAG over files in `knowledge/`
 - LangGraph workflow: understand → retrieve? → generate → review
 - Input validation, rate limiting, logging, GitHub Actions CI
@@ -33,18 +33,17 @@ Create `.env` (never commit this file):
 
 ```env
 GOOGLE_API_KEY=your_gemini_api_key_here
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
 ```
 
-Run:
+Run `supabase/schema.sql` in your Supabase SQL Editor, then start the app:
 
 ```powershell
 streamlit run app.py
 ```
 
-Demo login:
-
-- Username: `demo`
-- Password: `demo123`
+Sign up or sign in with your email and password.
 
 ---
 
@@ -57,7 +56,7 @@ Streamlit UI
        -> RAG retrieve (Ask AI)
        -> Write | Reply | Ask services
        -> Review node
-  -> SQLite history + usage
+  -> Supabase Auth + Postgres (profiles, history, usage)
 ```
 
 See [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) for the phase roadmap and file roles.
@@ -67,8 +66,8 @@ See [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) for the phase roadmap and file role
 ## Streamlit Cloud
 
 - Main file: `app.py`
-- Secret: `GOOGLE_API_KEY`
-- Recommended secret/env for writable DB: `ACA_DB_PATH=/tmp/aca.db`
+- Secrets: `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- Run `supabase/schema.sql` in Supabase before first deploy
 
 ---
 
@@ -80,7 +79,7 @@ Never commit:
 - API keys
 - passwords / tokens
 
-`.gitignore` already excludes `.env`, `.venv/`, `__pycache__/`, and `*.db`.
+`.gitignore` already excludes `.env`, `.venv/`, and `__pycache__/`.
 
 ---
 

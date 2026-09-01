@@ -7,3 +7,4 @@ langchain-text-splitters
 langgraph
 numpy
 python-dotenv
+supabase>=2.0.0

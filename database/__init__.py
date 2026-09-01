@@ -1,124 +1,29 @@
-"""SQLite persistence for users, history, and usage tracking."""
+"""Supabase persistence for history and usage tracking."""
 
 from __future__ import annotations
 
-import hashlib
-import os
-import sqlite3
 import time
-from pathlib import Path
+from datetime import datetime
 from typing import Any
 
-# Local: database/aca.db — Cloud-friendly override via ACA_DB_PATH (e.g. /tmp/aca.db)
-DB_PATH = Path(os.getenv("ACA_DB_PATH", str(Path(__file__).resolve().parent / "aca.db")))
+from auth.supabase_client import get_supabase_client
 
 
-def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+def _parse_ts(value: Any) -> float:
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
+    return time.time()
 
 
-def init_db() -> None:
-    with _connect() as conn:
-        conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                display_name TEXT NOT NULL,
-                email TEXT,
-                default_tone TEXT DEFAULT 'Professional',
-                created_at REAL NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                feature TEXT NOT NULL,
-                title TEXT NOT NULL,
-                input_text TEXT,
-                output_text TEXT,
-                tone TEXT,
-                length TEXT,
-                created_at REAL NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            );
-
-            CREATE TABLE IF NOT EXISTS usage_events (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                feature TEXT NOT NULL,
-                model TEXT,
-                input_tokens INTEGER DEFAULT 0,
-                output_tokens INTEGER DEFAULT 0,
-                total_tokens INTEGER DEFAULT 0,
-                latency_ms INTEGER DEFAULT 0,
-                status TEXT NOT NULL,
-                created_at REAL NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            );
-            """
-        )
-
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
-
-
-def ensure_demo_user() -> None:
-    """Create a demo account for local/cloud learning use."""
-    with _connect() as conn:
-        row = conn.execute("SELECT id FROM users WHERE username = ?", ("demo",)).fetchone()
-        if row:
-            return
-        conn.execute(
-            """
-            INSERT INTO users (username, password_hash, display_name, email, default_tone, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                "demo",
-                hash_password("demo123"),
-                "Muhamad Waqas",
-                "muhamad@example.com",
-                "Professional",
-                time.time(),
-            ),
-        )
-
-
-def authenticate(username: str, password: str) -> dict[str, Any] | None:
-    with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM users WHERE username = ? AND password_hash = ?",
-            (username.strip(), hash_password(password)),
-        ).fetchone()
-        return dict(row) if row else None
-
-
-def get_user(user_id: int) -> dict[str, Any] | None:
-    with _connect() as conn:
-        row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-        return dict(row) if row else None
-
-
-def update_profile(user_id: int, display_name: str, email: str, default_tone: str) -> None:
-    with _connect() as conn:
-        conn.execute(
-            """
-            UPDATE users
-            SET display_name = ?, email = ?, default_tone = ?
-            WHERE id = ?
-            """,
-            (display_name.strip(), email.strip(), default_tone, user_id),
-        )
+def estimate_tokens(text: str) -> int:
+    return max(1, len(text) // 4) if text else 0
 
 
 def add_history(
     *,
-    user_id: int,
+    user_id: str,
     feature: str,
     title: str,
     input_text: str,
@@ -126,48 +31,64 @@ def add_history(
     tone: str,
     length: str,
 ) -> None:
-    with _connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO history (user_id, feature, title, input_text, output_text, tone, length, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (user_id, feature, title[:80], input_text, output_text, tone, length, time.time()),
+    client = get_supabase_client()
+    client.table("history").insert(
+        {
+            "user_id": user_id,
+            "feature": feature,
+            "title": (title or feature)[:80],
+            "input_text": input_text,
+            "output_text": output_text,
+            "tone": tone,
+            "length": length,
+        }
+    ).execute()
+
+
+def list_history(user_id: str, limit: int = 8) -> list[dict[str, Any]]:
+    client = get_supabase_client()
+    res = (
+        client.table("history")
+        .select("id, feature, title, created_at")
+        .eq("user_id", user_id)
+        .order("created_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    items: list[dict[str, Any]] = []
+    for row in res.data or []:
+        items.append(
+            {
+                "id": row["id"],
+                "feature": row["feature"],
+                "title": row["title"],
+                "created_at": _parse_ts(row.get("created_at")),
+            }
         )
+    return items
 
 
-def list_history(user_id: int, limit: int = 8) -> list[dict[str, Any]]:
-    with _connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT id, feature, title, created_at
-            FROM history
-            WHERE user_id = ?
-            ORDER BY created_at DESC
-            LIMIT ?
-            """,
-            (user_id, limit),
-        ).fetchall()
-        return [dict(r) for r in rows]
-
-
-def get_history_item(user_id: int, item_id: int) -> dict[str, Any] | None:
-    with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM history WHERE id = ? AND user_id = ?",
-            (item_id, user_id),
-        ).fetchone()
-        return dict(row) if row else None
-
-
-def estimate_tokens(text: str) -> int:
-    # Rough heuristic for learning/demo usage tracking (~4 chars per token).
-    return max(1, len(text) // 4) if text else 0
+def get_history_item(user_id: str, item_id: int) -> dict[str, Any] | None:
+    client = get_supabase_client()
+    res = (
+        client.table("history")
+        .select("*")
+        .eq("id", item_id)
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+    )
+    rows = res.data or []
+    if not rows:
+        return None
+    row = rows[0]
+    row["created_at"] = _parse_ts(row.get("created_at"))
+    return row
 
 
 def add_usage(
     *,
-    user_id: int | None,
+    user_id: str | None,
     feature: str,
     model: str,
     input_text: str,
@@ -175,40 +96,35 @@ def add_usage(
     latency_ms: int,
     status: str,
 ) -> None:
+    if not user_id:
+        return
     in_tok = estimate_tokens(input_text)
     out_tok = estimate_tokens(output_text)
-    with _connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO usage_events (
-                user_id, feature, model, input_tokens, output_tokens, total_tokens,
-                latency_ms, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                user_id,
-                feature,
-                model,
-                in_tok,
-                out_tok,
-                in_tok + out_tok,
-                latency_ms,
-                status,
-                time.time(),
-            ),
-        )
+    client = get_supabase_client()
+    client.table("usage_events").insert(
+        {
+            "user_id": user_id,
+            "feature": feature,
+            "model": model,
+            "input_tokens": in_tok,
+            "output_tokens": out_tok,
+            "total_tokens": in_tok + out_tok,
+            "latency_ms": latency_ms,
+            "status": status,
+        }
+    ).execute()
 
 
-def usage_summary(user_id: int) -> dict[str, int]:
-    with _connect() as conn:
-        row = conn.execute(
-            """
-            SELECT
-                COUNT(*) AS requests,
-                COALESCE(SUM(total_tokens), 0) AS tokens
-            FROM usage_events
-            WHERE user_id = ?
-            """,
-            (user_id,),
-        ).fetchone()
-        return {"requests": int(row["requests"]), "tokens": int(row["tokens"])}
+def usage_summary(user_id: str) -> dict[str, int]:
+    client = get_supabase_client()
+    res = (
+        client.table("usage_events")
+        .select("total_tokens")
+        .eq("user_id", user_id)
+        .execute()
+    )
+    rows = res.data or []
+    return {
+        "requests": len(rows),
+        "tokens": sum(int(r.get("total_tokens") or 0) for r in rows),
+    }
