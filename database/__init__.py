@@ -93,18 +93,70 @@ def authenticate(username: str, password: str) -> dict[str, Any] | None:
     with _connect() as conn:
         row = conn.execute(
             "SELECT * FROM users WHERE username = ? AND password_hash = ?",
-            (username.strip(), hash_password(password)),
+            (username.strip().lower(), hash_password(password)),
         ).fetchone()
         return dict(row) if row else None
 
 
-def get_user(user_id: int) -> dict[str, Any] | None:
+def username_exists(username: str) -> bool:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE username = ?",
+            (username.strip().lower(),),
+        ).fetchone()
+        return row is not None
+
+
+def create_user(
+    *,
+    username: str,
+    password: str,
+    display_name: str,
+    email: str = "",
+) -> tuple[dict[str, Any] | None, str]:
+    """Create a user account. Returns (user, error_message)."""
+    username = username.strip().lower()
+    display_name = display_name.strip()
+    email = email.strip()
+
+    if len(username) < 3:
+        return None, "Username must be at least 3 characters."
+    if not username.replace("_", "").isalnum():
+        return None, "Username can only contain letters, numbers, and underscores."
+    if len(password) < 6:
+        return None, "Password must be at least 6 characters."
+    if not display_name:
+        return None, "Please enter your display name."
+    if username_exists(username):
+        return None, "That username is already taken."
+
+    with _connect() as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO users (username, password_hash, display_name, email, default_tone, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                username,
+                hash_password(password),
+                display_name,
+                email,
+                "Professional",
+                time.time(),
+            ),
+        )
+        user_id = int(cur.lastrowid)
+
+    return get_user(user_id), ""
+
+
+def get_user(user_id: int | str) -> dict[str, Any] | None:
     with _connect() as conn:
         row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         return dict(row) if row else None
 
 
-def update_profile(user_id: int, display_name: str, email: str, default_tone: str) -> None:
+def update_profile(user_id: int | str, display_name: str, email: str, default_tone: str) -> None:
     with _connect() as conn:
         conn.execute(
             """
@@ -118,7 +170,7 @@ def update_profile(user_id: int, display_name: str, email: str, default_tone: st
 
 def add_history(
     *,
-    user_id: int,
+    user_id: int | str,
     feature: str,
     title: str,
     input_text: str,
@@ -136,7 +188,7 @@ def add_history(
         )
 
 
-def list_history(user_id: int, limit: int = 8) -> list[dict[str, Any]]:
+def list_history(user_id: int | str, limit: int = 8) -> list[dict[str, Any]]:
     with _connect() as conn:
         rows = conn.execute(
             """
@@ -151,7 +203,7 @@ def list_history(user_id: int, limit: int = 8) -> list[dict[str, Any]]:
         return [dict(r) for r in rows]
 
 
-def get_history_item(user_id: int, item_id: int) -> dict[str, Any] | None:
+def get_history_item(user_id: int | str, item_id: int) -> dict[str, Any] | None:
     with _connect() as conn:
         row = conn.execute(
             "SELECT * FROM history WHERE id = ? AND user_id = ?",
@@ -167,7 +219,7 @@ def estimate_tokens(text: str) -> int:
 
 def add_usage(
     *,
-    user_id: int | None,
+    user_id: int | str | None,
     feature: str,
     model: str,
     input_text: str,
@@ -199,7 +251,7 @@ def add_usage(
         )
 
 
-def usage_summary(user_id: int) -> dict[str, int]:
+def usage_summary(user_id: int | str) -> dict[str, int]:
     with _connect() as conn:
         row = conn.execute(
             """

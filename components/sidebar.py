@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import html
+import re
 import time
 
 import streamlit as st
@@ -26,6 +28,19 @@ def _relative_time(ts: float) -> str:
     if delta < 86400:
         return f"{delta // 3600}h ago"
     return f"{delta // 86400}d ago"
+
+
+def _short_title(title: str, limit: int = 28) -> str:
+    """Keep RECENT labels short like the mockup."""
+    text = (title or "Untitled").strip()
+    text = re.sub(r"\s*[-–—]\s*\[.*?\]", "", text)
+    for sep in (" – ", " — ", " - "):
+        if sep in text:
+            text = text.split(sep)[0].strip()
+            break
+    if len(text) > limit:
+        return text[: limit - 1].rstrip() + "…"
+    return text or "Untitled"
 
 
 def render_sidebar() -> None:
@@ -63,11 +78,33 @@ def render_sidebar() -> None:
                     '<p class="aca-muted">No history yet. Generate something!</p>',
                     unsafe_allow_html=True,
                 )
-            for item in items:
-                label = f"{item['title']} · {_relative_time(item['created_at'])}"
-                if st.button(label, key=f"hist_{item['id']}", width="stretch"):
-                    st.session_state.selected_history_id = item["id"]
-                    st.rerun()
+            else:
+                for item in items:
+                    title = _short_title(item["title"])
+                    when = _relative_time(item["created_at"])
+                    row = st.columns([0.86, 0.14], gap="small")
+                    with row[0]:
+                        st.markdown(
+                            f"""
+                            <div class="aca-recent-row">
+                                <div class="aca-recent-icon">📄</div>
+                                <div class="aca-recent-text">
+                                    <div class="aca-recent-title">{html.escape(title)}</div>
+                                    <div class="aca-recent-time">{html.escape(when)}</div>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    with row[1]:
+                        if st.button(
+                            "›",
+                            key=f"hist_{item['id']}",
+                            type="tertiary",
+                            help=f"Open: {title}",
+                        ):
+                            st.session_state.selected_history_id = item["id"]
+                            st.rerun()
         else:
             st.markdown(
                 '<p class="aca-muted">Sign in to see history.</p>',
