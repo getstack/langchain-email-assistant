@@ -46,7 +46,8 @@ UI (Streamlit)
 ## Tech Stack
 
 - Python, Streamlit
-- LangChain, LangGraph, langchain-google-genai
+- LangChain, LangGraph, langchain-google-genai, langchain-openai
+- Chat: Gemini or OpenRouter MiniMax (`LLM_PROVIDER`)
 - Google embeddings + in-memory cosine retrieval (RAG)
 - Supabase Auth + Postgres
 - python-dotenv
@@ -72,9 +73,11 @@ UI (Streamlit)
 - Streamlit theme primaryColor set to purple (fixes red Sign in button)
 - Compact RECENT history rows in sidebar (mockup-sized)
 - Supabase-only backend (auth, profiles, history, usage)
+- OpenRouter MiniMax chat provider (`LLM_PROVIDER=openrouter`, embeddings still Gemini)
 
 ### Planned / next hardening
 
+- RAG hardening (logging, stricter context prompt, show sources)
 - OAuth providers via Supabase
 - LangSmith tracing
 - Docker / full API split
@@ -84,7 +87,12 @@ UI (Streamlit)
 
 1. Create and activate `.venv`
 2. `pip install -r requirements.txt`
-3. Copy `.env.example` to `.env` and set `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+3. Copy `.env.example` to `.env` and set:
+   - `GOOGLE_API_KEY` (RAG embeddings; also if `LLM_PROVIDER=gemini`)
+   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+   - For MiniMax: `LLM_PROVIDER=openrouter`, `OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`
 4. Run `supabase/schema.sql` in Supabase SQL Editor
 5. `streamlit run app.py`
 6. Sign up or sign in with your email account
+
+Work on the long-lived **`staging`** branch; merge to `main` for production (do not delete `staging`).

@@ -6,7 +6,7 @@ import time
 
 from langchain_core.output_parsers import StrOutputParser
 
-from llm import MODEL_NAME, get_model
+from llm import active_model_name, get_model
 from prompts import LENGTH_GUIDANCE, reply_prompt
 from services import format_email_result, parse_email_json
 
@@ -36,7 +36,7 @@ def generate_reply(
         "body": parsed["body"],
         "text": format_email_result(parsed),
         "raw": raw,
-        "model": MODEL_NAME,
+        "model": active_model_name(),
         "latency_ms": latency_ms,
         "input_text": original_email,
     }

@@ -1,21 +1,23 @@
 # Daily Git Workflow (PowerShell)
 
-Use this routine to push progress every day while building Supabase + SaaS features.
+Use this routine to push progress every day. Work on **`staging`** first; merge to **`main`** when ready for production. **Never delete `staging`.**
+
+## Branch model
+
+```text
+feature/*  →  staging  →  main (production)
+```
+
+- `staging` — long-lived integration branch (keep forever)
+- `main` — production (Streamlit Cloud)
+- Optional short-lived `feature/*` branches for larger work
 
 ## Morning — start work
 
 ```powershell
 cd "D:\AI Projects\email-assistant"
-git checkout main
-git pull origin main
-git checkout feature/supabase-auth
-git merge main
-```
-
-If the feature branch does not exist yet:
-
-```powershell
-git checkout -b feature/supabase-auth
+git checkout staging
+git pull origin staging
 ```
 
 ## During the day — save progress
@@ -24,7 +26,7 @@ git checkout -b feature/supabase-auth
 git status
 git add <files you changed>
 git commit -m "Describe what you learned or built today"
-git push -u origin feature/supabase-auth
+git push -u origin staging
 ```
 
 ## End of day — push even if small
@@ -32,24 +34,28 @@ git push -u origin feature/supabase-auth
 ```powershell
 git add .
 git commit -m "Daily progress: <short summary>"
-git push origin feature/supabase-auth
+git push origin staging
 ```
 
-## When a feature is ready
+## When staging is ready for production
 
 ```powershell
-# Open PR on GitHub: feature/supabase-auth -> main
-# After review + local test, merge PR
+# Prefer a PR: staging -> main (do NOT delete staging after merge)
+# Or locally:
 git checkout main
 git pull origin main
+git merge staging
+git push origin main
+
+git checkout staging
 ```
 
 ## Rules
 
 - Never commit `.env` or API keys
-- Work on a **feature branch**, not directly on `main`
+- Prefer **`staging`** for ongoing work; do not delete it after merging to `main`
 - One clear commit message per logical change
-- Tag milestones: `v0.5.0` for Supabase auth, etc.
+- Tag milestones on `main` when needed
 
 ## Streamlit Cloud secrets (when deploying)
 
@@ -57,4 +63,8 @@ git pull origin main
 GOOGLE_API_KEY = "..."
 SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co"
 SUPABASE_ANON_KEY = "..."
+LLM_PROVIDER = "openrouter"
+OPENROUTER_API_KEY = "sk-or-v1-..."
+OPENROUTER_MODEL = "minimax/minimax-m3:free"
+OPENROUTER_MAX_TOKENS = "2048"
 ```

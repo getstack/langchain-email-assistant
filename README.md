@@ -1,6 +1,6 @@
 # AI Communication Assistant
 
-A learning + portfolio AI SaaS built with **Python, Streamlit, LangChain, Google Gemini, RAG, and LangGraph**.
+A learning + portfolio AI SaaS built with **Python, Streamlit, LangChain, Gemini/OpenRouter, RAG, and LangGraph**.
 
 This repository evolved from a simple email generator (`v0.1.0`) into a multi-mode communication assistant with auth, history, usage tracking, retrieval, and workflow orchestration.
 
@@ -35,6 +35,12 @@ Create `.env` (never commit this file):
 GOOGLE_API_KEY=your_gemini_api_key_here
 SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# Optional: OpenRouter MiniMax for chat (RAG embeddings still use Gemini)
+LLM_PROVIDER=openrouter
+OPENROUTER_API_KEY=sk-or-v1-your_key_here
+OPENROUTER_MODEL=minimax/minimax-m3:free
+OPENROUTER_MAX_TOKENS=2048
 ```
 
 Run `supabase/schema.sql` in your Supabase SQL Editor, then start the app:
@@ -67,7 +73,9 @@ See [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) for the phase roadmap and file role
 
 - Main file: `app.py`
 - Secrets: `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- Optional OpenRouter: `LLM_PROVIDER`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `OPENROUTER_MAX_TOKENS`
 - Run `supabase/schema.sql` in Supabase before first deploy
+- Integrate on **`staging`**, then merge to **`main`** for production (keep `staging`)
 
 ---
 

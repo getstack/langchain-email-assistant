@@ -6,7 +6,7 @@ import time
 
 from langchain_core.output_parsers import StrOutputParser
 
-from llm import MODEL_NAME, get_model
+from llm import active_model_name, get_model
 from prompts import LENGTH_GUIDANCE, ask_prompt
 
 
@@ -34,7 +34,7 @@ def ask_ai(
         "body": answer.strip(),
         "text": answer.strip(),
         "raw": answer,
-        "model": MODEL_NAME,
+        "model": active_model_name(),
         "latency_ms": latency_ms,
         "input_text": question,
     }
