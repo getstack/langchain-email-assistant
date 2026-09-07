@@ -62,7 +62,11 @@ Answer the user's question clearly and accurately.
 Tone preference: {tone}
 Length guidance: {length_guidance}
 
-Use the knowledge context when it is relevant. If the context is empty or irrelevant, answer from general knowledge and say when you are unsure.
+Knowledge context rules:
+- If knowledge context below is NOT empty, answer using that context as the primary source.
+- Prefer quoting or paraphrasing the provided guidelines/facts.
+- Do NOT say you lack company guidelines when the context contains them.
+- If the context is empty, say that no knowledge context was retrieved and answer briefly from general knowledge.
 
 Knowledge context:
 {context}

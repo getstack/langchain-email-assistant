@@ -53,5 +53,13 @@ def render_result(*, on_regenerate, on_edit) -> None:
         f'<div class="aca-result-card">{safe_text}</div>',
         unsafe_allow_html=True,
     )
+    if feature == "ask_ai":
+        sources = result.get("sources") or []
+        if sources:
+            st.caption("RAG sources: " + ", ".join(str(s) for s in sources))
+        elif result.get("rag_used"):
+            st.caption("RAG: context used")
+        else:
+            st.caption("RAG: no knowledge context retrieved")
     if result.get("latency_ms"):
         st.caption(f"Latency: {result['latency_ms']} ms · Model: {result.get('model', '')}")

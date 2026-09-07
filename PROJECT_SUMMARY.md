@@ -48,7 +48,8 @@ UI (Streamlit)
 - Python, Streamlit
 - LangChain, LangGraph, langchain-google-genai, langchain-openai
 - Chat: Gemini or OpenRouter MiniMax (`LLM_PROVIDER`)
-- Google embeddings + in-memory cosine retrieval (RAG)
+- Google embeddings (`gemini-embedding-001`) + in-memory cosine RAG
+  - Chunks stored in process memory (`rag._CHUNKS` + `rag._MATRIX`), not disk/DB
 - Supabase Auth + Postgres
 - python-dotenv
 
@@ -74,10 +75,11 @@ UI (Streamlit)
 - Compact RECENT history rows in sidebar (mockup-sized)
 - Supabase-only backend (auth, profiles, history, usage)
 - OpenRouter MiniMax chat provider (`LLM_PROVIDER=openrouter`, embeddings still Gemini)
+- RAG hardening: fix embedding model 404, log failures, show sources, keep Ask answers grounded
 
 ### Planned / next hardening
 
-- RAG hardening (logging, stricter context prompt, show sources)
+- Persist RAG vectors (e.g. Supabase pgvector)
 - OAuth providers via Supabase
 - LangSmith tracing
 - Docker / full API split

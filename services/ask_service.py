@@ -16,6 +16,7 @@ def ask_ai(
     tone: str = "Professional",
     length: str = "Medium",
     context: str = "",
+    sources: list | None = None,
 ) -> dict:
     started = time.perf_counter()
     chain = ask_prompt | get_model(temperature=0.4) | StrOutputParser()
@@ -24,7 +25,7 @@ def ask_ai(
             "question": question,
             "tone": tone,
             "length_guidance": LENGTH_GUIDANCE.get(length, LENGTH_GUIDANCE["Medium"]),
-            "context": context or "No extra knowledge context provided.",
+            "context": context or "",
         }
     )
     latency_ms = int((time.perf_counter() - started) * 1000)
@@ -37,4 +38,6 @@ def ask_ai(
         "model": active_model_name(),
         "latency_ms": latency_ms,
         "input_text": question,
+        "sources": sources or [],
+        "rag_used": bool((context or "").strip()),
     }

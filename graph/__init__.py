@@ -9,7 +9,7 @@ from langgraph.graph import END, StateGraph
 
 from llm import get_model
 from prompts import review_prompt
-from rag import retrieve_context
+from rag import retrieve
 from services.ask_service import ask_ai
 from services.email_service import generate_email
 from services.reply_service import generate_reply
@@ -22,6 +22,7 @@ class WorkflowState(TypedDict, total=False):
     length: str
     original_email: str
     context: str
+    sources: list
     draft: str
     result: dict
     reviewed: bool
@@ -34,9 +35,13 @@ def understand_request(state: WorkflowState) -> WorkflowState:
 
 def retrieve_if_needed(state: WorkflowState) -> WorkflowState:
     if state.get("mode") != "ask":
-        return {**state, "context": ""}
-    context = retrieve_context(state.get("notes", ""))
-    return {**state, "context": context}
+        return {**state, "context": "", "sources": []}
+    found = retrieve(state.get("notes", ""))
+    return {
+        **state,
+        "context": found.get("context") or "",
+        "sources": found.get("sources") or [],
+    }
 
 
 def generate_response(state: WorkflowState) -> WorkflowState:
@@ -58,6 +63,7 @@ def generate_response(state: WorkflowState) -> WorkflowState:
             tone=tone,
             length=length,
             context=state.get("context", ""),
+            sources=state.get("sources") or [],
         )
     else:
         result = generate_email(notes=notes, tone=tone, length=length)
@@ -66,6 +72,11 @@ def generate_response(state: WorkflowState) -> WorkflowState:
 
 
 def review_draft(state: WorkflowState) -> WorkflowState:
+    # Keep Ask AI answers grounded in RAG; skip rewrite when context was used.
+    if state.get("mode") == "ask" and (state.get("context") or "").strip():
+        result = dict(state.get("result") or {})
+        return {**state, "result": result, "reviewed": False}
+
     draft = state.get("draft", "")
     tone = state.get("tone", "Professional")
     chain = review_prompt | get_model(temperature=0.2) | StrOutputParser()
